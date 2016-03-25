@@ -22,12 +22,13 @@ request({
         var f1 = body.followers < 1 ? 1: body.followers;
         var f2 = body.following < 1 ? 1: body.following;
         var fRatio = (f1 / f2).toPrecision(2)
-        var out = 'name:\t\t' + body.name
-        + '\nlogin:\t\t' + body.login
-        + '\nemail:\t\t' + body.email
-        + '\ncompany:\t' + body.company
-        + '\nlocation:\t' + body.location
-        + '\nfollow ratio:\t' + fRatio;
+
+        var out = 'name:\t\t'   + body.name
+          + '\nlogin:\t\t'      + body.login
+          + '\nemail:\t\t'      + body.email
+          + '\ncompany:\t'      + body.company
+          + '\nlocation:\t'     + body.location
+          + '\nfollow ratio:\t' + fRatio;
 
         console.log(out);
 
