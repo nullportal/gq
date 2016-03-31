@@ -4,43 +4,37 @@ var url = require('url');
 var request = require('request');
 
 var base = 'https://api.github.com/';
-var user = process.argv[2];
 
-console.log('querying', user);
+function gq() {
 
+    return {
+        topRuncoms: function (shell, callback) { // TODO validate
+            shell = shell + 'rc'; // TODO only add rc if missing
 
-request({
-    url: base + 'users/' + user,
-    json: true,
-    headers: {
-        'User-Agent': 'student'
-    }
-}, function (error, response, body) {
+            request({
+                url: base
+                  + 'search/repositories?q='
+                  + shell
+                  + '+language:shell&sort=stars&order=desc'
+                  + '&page=1',
+                json: true,
+                headers: {
+                    'User-Agent': 'comp74-student'
+                }
+            }, function (error, response, body) {
+                if (! error) {
+                    error = null;
+                    body  = body.items.slice(0, 10); // top ten
+                }
+                callback({
+                    error:  error,
+                    body:   body,
+                    status: response.statusCode
+                });
+            });
+        }
+    };
+}
 
-    if (! error && response.statusCode === 200) {
-
-        var f1 = body.followers < 1 ? 1: body.followers;
-        var f2 = body.following < 1 ? 1: body.following;
-        var fRatio = (f1 / f2).toPrecision(2)
-
-        var out = 'name:\t\t'   + body.name
-          + '\nlogin:\t\t'      + body.login
-          + '\nemail:\t\t'      + body.email
-          + '\ncompany:\t'      + body.company
-          + '\nlocation:\t'     + body.location
-          + '\nfollow ratio:\t' + fRatio;
-
-        console.log(out);
-
-    } else if (! error) {
-
-        console.log('status:\t\t%j', response.statusCode);
-        console.log('status:\t\t%j', body.message);
-
-    } else {
-
-        console.error('error: %s', error);
-    }
-});
-
+module.exports = gq();
 
