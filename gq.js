@@ -7,6 +7,15 @@ var base = 'https://api.github.com/';
 
 function gq() {
 
+    var composite = {
+        error: true,
+        status: 666,
+        message: '',
+        body: [null],
+        count: 0
+    };
+
+
     return {
         /* TODO
          *   check if there is a file that matches 'shell' pattern before
@@ -32,14 +41,10 @@ function gq() {
                   , response.statusCode
                   , response.statusMessage);
                 if (! error) {
-                    error = null;
-                    body  = body.items.slice(0, 10); // top ten
+                    composite.error = error;
+                    composite.body  = body.items.slice(0, 10); // top ten
                 }
-                callback({
-                    error:  error,
-                    body:   body,
-                    status: response.statusCode
-                });
+                callback(composite);
             });
         }
     };
