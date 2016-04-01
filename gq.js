@@ -35,9 +35,12 @@ function gq() {
                     'User-Agent': 'comp74-student'
                 }
             }, function (error, response, body) {
-                var count = body.total_count;
+                composite.error   = error;
+                composite.status  = response.statusCode;
+                composite.message = response.statusMessage;
+                composite.count   = body.total_count;
                 console.log('%d results [%s]:%s'
-                  , count
+                  , composite.count
                   , response.statusCode
                   , response.statusMessage);
                 if (! error) {
