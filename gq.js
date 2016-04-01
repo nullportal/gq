@@ -8,6 +8,10 @@ var base = 'https://api.github.com/';
 function gq() {
 
     return {
+        /* TODO
+         *   check if there is a file that matches 'shell' pattern before
+         *   including in stack.
+         */
         topRuncoms: function (shell, callback) { // TODO validate
             shell = shell + 'rc'; // TODO only add rc if missing
 
