@@ -26,6 +26,11 @@ function gq() {
                     'User-Agent': 'comp74-student'
                 }
             }, function (error, response, body) {
+                var count = body.total_count;
+                console.log('%d results [%s]:%s'
+                  , count
+                  , response.statusCode
+                  , response.statusMessage);
                 if (! error) {
                     error = null;
                     body  = body.items.slice(0, 10); // top ten
