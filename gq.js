@@ -38,10 +38,6 @@ function gq() {
                   , response.statusCode
                   , response.statusMessage);
 
-                if (! error) {
-                    composite.error = error;
-                    composite.body  = body.items.slice(0, 10); // top ten
-                }
                 callback(composite);
             });
         }
@@ -74,6 +70,9 @@ function gq() {
         // even successful queries can return 0 matches
         composite.message = _buildMessage(obj).message;
         composite.summary = _buildMessage(obj).summary;
+
+        // load only first ten matching repositories
+        composite.body    = obj.body.items.slice(0, 10);
 
         return composite;
     }
