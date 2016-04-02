@@ -54,21 +54,47 @@ function gq() {
         var composite = {
             error: true,
             status: 666,
+            summary: '',
             message: '',
             body: [null],
             count: 0
         };
 
+        // error is always valid or null
         composite.error   = obj.error;
+
+        // HTTP status code
         composite.status  = obj.response.statusCode;
-        composite.message = _buildMessage(obj);
+
+        // possible results are 0 or greater
         composite.count   = obj.body.total_count;
+
+        // even successful queries can return 0 matches
+        composite.message = _buildMessage(obj).message;
+        composite.summary = _buildMessage(obj).summary;
 
         return composite;
     }
     function _buildMessage(obj) {
+        var count = obj.body.total_count;
+        var message = '';
+        var summary = '';
 
-        return 'placeholder';
+        if (count < 1) {
+            summary = 'Failure';
+            message = 'No matches found';
+        } else {
+            summary = 'Success';
+            message = count + ' matches found'
+              + ' - displaying top'
+              + ' '
+              + (count < 10 ? count : '10');
+        }
+
+        return {
+            message: message,
+            summary: summary
+        };
     }
 }
 
