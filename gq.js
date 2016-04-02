@@ -32,10 +32,12 @@ function gq() {
                     response: response,
                     body: body
                 });
+
                 console.log('%d results [%s]:%s'
                   , composite.count
                   , response.statusCode
                   , response.statusMessage);
+
                 if (! error) {
                     composite.error = error;
                     composite.body  = body.items.slice(0, 10); // top ten
@@ -49,7 +51,7 @@ function gq() {
      * Private functions
      */
     function _buildComposite(obj) {
-        /*XXX*/console.log('_buildComposite', Object.keys(obj));
+
         // first, build a safe default
         var composite = {
             error: true,
@@ -75,6 +77,7 @@ function gq() {
 
         return composite;
     }
+
     function _buildMessage(obj) {
         var count = obj.body.total_count;
         var message = '';
