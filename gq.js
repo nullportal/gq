@@ -35,10 +35,11 @@ function gq() {
                     'User-Agent': 'comp74-student'
                 }
             }, function (error, response, body) {
-                composite.error   = error;
-                composite.status  = response.statusCode;
-                composite.message = response.statusMessage;
-                composite.count   = body.total_count;
+                composite = _buildComposite({
+                    error: error,
+                    response: response,
+                    body: body
+                });
                 console.log('%d results [%s]:%s'
                   , composite.count
                   , response.statusCode
@@ -51,6 +52,25 @@ function gq() {
             });
         }
     };
+
+    /*
+     * Private functions
+     */
+    function _buildComposite(obj, type) {
+        /*XXX*/console.log('_buildComposite', Object.keys(obj), type);
+        var composite = {};
+
+        composite.error   = obj.error;
+        composite.status  = obj.response.statusCode;
+        composite.message = _buildMessage(obj);
+        composite.count   = obj.body.total_count;
+
+        return composite;
+    }
+    function _buildMessage(obj) {
+
+        return 'placeholder';
+    }
 }
 
 module.exports = gq();
