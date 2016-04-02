@@ -13,7 +13,18 @@ function gq() {
          *   check if there is a file that matches 'shell' pattern before
          *   including in stack.
          */
-        topRuncoms: function (shell, callback) { // TODO validate
+        topRuncoms: function (shell, callback) {
+
+            // TODO add these to composite and return to end user
+            if (typeof shell !== 'string')
+                throw new Error("Invalid type " + typeof shell);
+            if (shell.length > 10)
+                throw new Error("Shell name too long " + shell.length);
+            if (shell.length < 3)
+                throw new Error("Shell name too short " + shell.length);
+            if (shell.match(/[a-zA-Z0-9]/))
+                throw new Error("Shell name contains non alphanumeric chars");
+
             shell = shell + 'rc'; // TODO only add rc if missing
 
             request({
