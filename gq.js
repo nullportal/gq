@@ -48,8 +48,8 @@ function gq() {
     /*
      * Private functions
      */
-    function _buildComposite(obj, type) {
-        /*XXX*/console.log('_buildComposite', Object.keys(obj), type);
+    function _buildComposite(obj) {
+        /*XXX*/console.log('_buildComposite', Object.keys(obj));
         // first, build a safe default
         var composite = {
             error: true,
