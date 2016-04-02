@@ -7,14 +7,6 @@ var base = 'https://api.github.com/';
 
 function gq() {
 
-    var composite = {
-        error: true,
-        status: 666,
-        message: '',
-        body: [null],
-        count: 0
-    };
-
 
     return {
         /* TODO
@@ -35,7 +27,7 @@ function gq() {
                     'User-Agent': 'comp74-student'
                 }
             }, function (error, response, body) {
-                composite = _buildComposite({
+                var composite = _buildComposite({
                     error: error,
                     response: response,
                     body: body
@@ -58,7 +50,14 @@ function gq() {
      */
     function _buildComposite(obj, type) {
         /*XXX*/console.log('_buildComposite', Object.keys(obj), type);
-        var composite = {};
+        // first, build a safe default
+        var composite = {
+            error: true,
+            status: 666,
+            message: '',
+            body: [null],
+            count: 0
+        };
 
         composite.error   = obj.error;
         composite.status  = obj.response.statusCode;
