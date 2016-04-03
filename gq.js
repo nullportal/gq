@@ -15,7 +15,6 @@ function gq() {
          */
         topRuncoms: function (shell, callback) {
 
-            // TODO add these to composite and return to end user
             if (typeof shell !== 'string')
                 throw new Error("Invalid type " + typeof shell);
             if (shell.length > 10)
@@ -25,7 +24,9 @@ function gq() {
             if (! shell.match(/[a-zA-Z0-9]/))
                 throw new Error("Shell name contains non alphanumeric chars");
 
-            shell = shell + 'rc'; // TODO only add rc if missing
+            if (shell.slice(-2) !== 'rc') {
+                shell += 'rc';
+            }
 
             request({
                 url: base
