@@ -38,6 +38,9 @@ function gq() {
                     'User-Agent': 'comp74-student'
                 }
             }, function (error, response, body) {
+
+                /*XXX*/console.log('Base Query String "%s"', this.req.path);
+
                 var composite = _buildComposite({
                     error: error,
                     response: response,
@@ -83,9 +86,40 @@ function gq() {
         composite.summary = _buildMessage(obj).summary;
 
         // load only first ten matching repositories
-        composite.body    = obj.body.items.slice(0, 10);
+        composite.body    = _buildItems(obj.body.items);
 
         return composite;
+    }
+
+    /* TODO assess items, and return once done or items == 10.
+     *   check for /shell[rc]/ in repo's files.
+     *   if item <= 10, then just return top, don't assess/compare.
+     */
+    function _buildItems(items) {
+        /*XXX*/console.log('_buildItem(%s %ss)'
+          , items.length
+          , typeof items);
+
+        var assortment = [];
+
+        items.forEach(function (v, i, a) {
+
+            var filesURI = v.trees_url.replace('{/sha}', '/' + v.default_branch);
+
+            /*XXX*/console.log('Files URI %s', filesURI);
+
+        });
+
+        // XXX WIP - just return top ten, unassessed, for the nonse
+        return items.slice(0, 10);
+    }
+
+    /*
+     * Check if repository actually contains
+     * a runcom file for the desired shell.
+     */
+    function _checkItem(item) {
+        //
     }
 
     function _buildMessage(obj) {
