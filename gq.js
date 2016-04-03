@@ -30,7 +30,7 @@ function gq() {
             request({
                 url: base
                   + 'search/repositories?q='
-                  + shell
+                  + 'file:' + shell
                   + '+language:shell&sort=stars&order=desc'
                   + '&page=1',
                 json: true,
