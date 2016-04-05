@@ -10,8 +10,8 @@ function gq() {
 
     return {
         /* TODO
-         *   check if there is a file that matches 'shell' pattern before
-         *   including in stack.
+         *   Also return direct link to runcom file
+         *   with results.
          */
         topRuncoms: function (shell, callback) {
 
