@@ -5,6 +5,7 @@ var request = require('request');
 var async   = require('async');
 
 var base = 'https://api.github.com/';
+var token = process.argv[2];
 
 /*
  * XXX
@@ -12,7 +13,6 @@ var base = 'https://api.github.com/';
  *   to maintain sockets until individual query completed
  */
 
-/*XXX*/console.log('TOK:', process.argv[2]);
 
 var gq = {
 
@@ -21,7 +21,6 @@ var gq = {
      * but consumer would only hurt themselves.
      */
     shell: null,
-    token: process.argv[2],
     done:  false,
 
         isDone: function () { return this.done; },
@@ -235,7 +234,6 @@ var gq = {
                 i++;
             });
         });
-
     }
 
 
