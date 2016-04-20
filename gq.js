@@ -110,16 +110,17 @@ var gq = {
 
         //load only first ten matching repositories
         _buildBody(obj.body.items, function (parsedBody, finished) { // ie. arr 'set'
-            if (finished) {
-                /*XXX*/console.log('parsedBody', parsedBody);
+            if (finished) { // XXX stack is copies of (last?) item
+                //*XXX*/console.log('parsedBody', parsedBody);
+
                 composite.body = parsedBody;
 
                 //*XXX*/console.log('composite.body{', composite.body, '}');
+
+                /*XXX*/console.log('_buildComposite() done');
                 callback(composite);
             }
         });
-
-        //callback(composite);
     }
 
     function _buildMessage(obj) {
@@ -151,7 +152,6 @@ var gq = {
  */
     function _buildBody(items, callback) {
         console.log('_buildBody(%s %ss)', items.length, typeof items);
-        var selection = {};
         var limit = 10;
         var set = [];
         var finished = 0;
@@ -165,7 +165,7 @@ var gq = {
          * values to it.
          */
         items.forEach(function (item, index, array) {
-            selection = {};
+            var selection = {};
             selection.full_name     = array[index].full_name;
             selection.score         = array[index].score;
             selection.svn_url       = array[index].svn_url;
@@ -182,24 +182,31 @@ var gq = {
 
                 //*XXX*/console.log('limit--');
 
-                limit--;
 
                 // if all done, cb: (eg 3 of 3)
                 //if ('undefined' != typeof selection.runcom) {
                 //*XXX*/console.log('v%s\ni%d\na%d (len)', item, index, array.length);
                 //*XXX*/console.log('counting...', array.length);
-                    selection.runcom = runcom;
-                    set[index] = selection;
-                    finished++;
 
-                    /*XXX*/console.log('finished %d of %d', finished, items.length -1);
+                /*XXX*/console.log('selection.runcom = %s', runcom);
+                console.log(selection);
+                selection.runcom = runcom;
 
-                    // check if finished for each matching repo
-                    if (finished === items.length) { // this never true
-                        /*XXX*/console.log('_buildBody done', selection.runcom);
-                        callback(set, true);
-                    }
+                finished++;
+                limit--;
+
+
+                //*XXX*/console.log('finished %d of %d', finished, items.length);
+
+                // check if finished for each matching repo
+                if (finished === items.length) { // this never true
+                    /*XXX*/console.log('_buildBody done', selection.runcom);
+                    callback(set, true);
+                }
             });
+
+            /*XXX*/console.log('set[%d] = %j', index, selection);
+            set[index] = selection;
 
         });
     }
@@ -208,9 +215,9 @@ var gq = {
     function _getRuncom(item, callback) {
         var runcomPattern = new RegExp('^[\\.,dot,_]*' + gq.shell + '$', 'ig');
 
-        var trees_url = item.trees_url.replace('{/sha}', '/' + item.default_branch);
+        var trees_url  = item.trees_url.replace('{/sha}', '/' + item.default_branch);
         var runcomFile = false;
-            var i     = 0;
+        var i          = 0;
 
         request({
             url: trees_url,
