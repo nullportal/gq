@@ -24,10 +24,6 @@ var gq = {
 
         isDone: function () { return this.done; },
 
-        /* TODO
-         *   Also return direct link to runcom file
-         *   with results.
-         */
         topRuncoms: function (shell, callback) {
 
             if (typeof shell !== 'string')
@@ -55,15 +51,13 @@ var gq = {
                 url: base
                   + 'search/repositories?q='
                   + 'file:.' + shell
-                  + '+file:' + shell
                   + '&sort=stars&order=desc'
-                  + '&page=1',
+                  + '&per_page=10',
                 json: true,
                 headers: {
                     'User-Agent': 'comp74-student'
                 }
             }, function (error, response, body) {
-                //*XXX*/console.log('Base Query String "%s"', this.req.path);
 
                 var composite = {};
 
@@ -110,14 +104,12 @@ var gq = {
 
         //load only first ten matching repositories
         _buildBody(obj.body.items, function (parsedBody, finished) { // ie. arr 'set'
-            if (finished) { // XXX stack is copies of (last?) item
-                //*XXX*/console.log('parsedBody', parsedBody);
+            if (finished) {
 
                 composite.body = parsedBody;
 
-                //*XXX*/console.log('composite.body{', composite.body, '}');
-
                 /*XXX*/console.log('_buildComposite() done');
+
                 callback(composite);
             }
         });
@@ -145,19 +137,13 @@ var gq = {
         };
     }
 
-/*
- * XXX big problem:
- *   _buildBody returns multiple times, and then
- *   _getRuncom returns multiple times
- */
     function _buildBody(items, callback) {
-        console.log('_buildBody(%s %ss)', items.length, typeof items);
-        var limit = 10;
-        var set = [];
+        /*XXX*/console.log('_buildBody(%s %ss)', items.length, typeof items);
+
+        var set      = [];
         var finished = 0;
-        // Clamp the items we are assessing at a solid 50 maximum
+
         items.slice(0, 50);
-        //*XXX*/console.log(Object.keys(items[0]));
 
         /*
          * Define a blank object and copy a stripped down
@@ -173,45 +159,23 @@ var gq = {
 
             _getRuncom(item, function (runcom) {
 
-                //*XXX*/console.log(' index/arrlen: %d/%d', index, array.length - 1);
-                //*XXX*/console.log('selection=%j',set[index]);
-
-                //*XXX*/console.log('WOOF! assess:', runcom);
-                //*XXX*/console.log('OINK! assess:', ('undefined' != typeof runcom));
-
-
-                //*XXX*/console.log('limit--');
-
-
-                // if all done, cb: (eg 3 of 3)
-                //if ('undefined' != typeof selection.runcom) {
-                //*XXX*/console.log('v%s\ni%d\na%d (len)', item, index, array.length);
-                //*XXX*/console.log('counting...', array.length);
-
-                /*XXX*/console.log('selection.runcom = %s', runcom);
-                console.log(selection);
                 selection.runcom = runcom;
 
                 finished++;
-                limit--;
 
-
-                //*XXX*/console.log('finished %d of %d', finished, items.length);
-
-                // check if finished for each matching repo
                 if (finished === items.length) { // this never true
+
                     /*XXX*/console.log('_buildBody done', selection.runcom);
+
                     callback(set, true);
                 }
             });
 
-            /*XXX*/console.log('set[%d] = %j', index, selection);
             set[index] = selection;
 
         });
     }
 
-    // XXX this is presently executing AFTER topRuncoms function has sent back the composite object
     function _getRuncom(item, callback) {
         var runcomPattern = new RegExp('^[\\.,dot,_]*' + gq.shell + '$', 'ig');
 
@@ -228,25 +192,16 @@ var gq = {
             }
         }, function (error, response, body) {
             if (error) throw new Error(error);
-            //*XXX*/console.log(response.body.message);
-            //*XXX*/console.log('OINK',Object.keys(body).length);
             var len = Object.keys(body).length;
 
-            // TODO if '.bashrc', this is our runcom - move to next
-            // TODO if no match in this whole item then return false and try again
             var files = body.tree;
             var numFiles = files.length;
             files.forEach(function (file) { // XXX no safe default if no match
 
                 var fileName = file.path;
 
-                // TODO get actual number of files in repo !!!
-
-                //*XXX*/console.log('Checking file %d of %d', i, numFiles);
-                //*XXX*/console.log('checking %s in %s', file.path, trees_url);
-
                 if (fileName.match(runcomPattern)) {
-                    //*XXX*/console.log('file %s matches %s', file.path, runcomPattern);
+                    /*XXX*/console.log('file %s matches %s', file.path, runcomPattern);
                     runcomFile = fileName;
 
                 }  else {
@@ -255,7 +210,9 @@ var gq = {
 
 
                 if (i >= numFiles - 1) {
+
                     /*XXX*/console.log('_getRuncom done with %s', runcomFile);
+
                     callback(runcomFile); // Return matching runcom file
                 }
                 i++;
