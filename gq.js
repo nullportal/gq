@@ -24,6 +24,12 @@ var gq = {
 
         isDone: function () { return this.done; },
 
+        /*
+         * Return top 10 public repositories which match
+         * the query in some way, and provide a direct link
+         * to a matching runcom file, if one is found in the
+         * parent directory.
+         */
         topRuncoms: function (shell, callback) {
 
             if (typeof shell !== 'string')
@@ -83,7 +89,8 @@ var gq = {
     };
 
     /*
-     * Private functions
+     * Load an object with relevant data returned
+     * from a series of queries to the Github API
      */
     function _buildComposite(obj, callback) {
 
@@ -103,18 +110,26 @@ var gq = {
         composite.summary = _buildMessage(obj).summary;
 
         //load only first ten matching repositories
-        _buildBody(obj.body.items, function (parsedBody, finished) { // ie. arr 'set'
-            if (finished) {
+        if (composite.summary === 'Success') {
+            _buildBody(obj.body.items, function (parsedBody, finished) { // ie. arr 'set'
+                if (finished) {
 
-                composite.body = parsedBody;
+                    composite.body = parsedBody;
 
-                /*XXX*/console.log('_buildComposite() done');
+                    /*XXX*/console.log('_buildComposite() done');
 
-                callback(composite);
-            }
-        });
+                    callback(composite);
+                }
+            });
+        } else {
+            callback(composite);
+        }
     }
 
+    /*
+     * Build a relevant message to return
+     * to the end user
+     */
     function _buildMessage(obj) {
         var count   = obj.body.total_count;
         var message = '';
@@ -194,7 +209,7 @@ var gq = {
             if (error) throw new Error(error);
             var len = Object.keys(body).length;
 
-            var files = body.tree;
+            var files = body.tree || null;
             var numFiles = files.length;
             files.forEach(function (file) { // XXX no safe default if no match
 
