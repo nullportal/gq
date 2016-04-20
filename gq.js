@@ -12,6 +12,8 @@ var base = 'https://api.github.com/';
  *   to maintain sockets until individual query completed
  */
 
+/*XXX*/console.log('TOK:', process.argv[2]);
+
 var gq = {
 
     /* 
@@ -203,7 +205,7 @@ var gq = {
             json: true,
             headers: {
                 'User-Agent': 'comp74-student',
-                Authorization: 'token e03aa1982ccd7c291f39a0b0e4db54a0718c940c' // XXX REMOVE XXX
+                Authorization: 'token ' + token
             }
         }, function (error, response, body) {
             if (error) throw new Error(error);
