@@ -2,6 +2,7 @@
 
 var url = require('url');
 var request = require('request');
+var async   = require('async');
 
 var base = 'https://api.github.com/';
 
@@ -19,6 +20,9 @@ var gq = {
      */
     shell: null,
     token: process.argv[2],
+    done:  false,
+
+        isDone: function () { return this.done; },
 
         /* TODO
          *   Also return direct link to runcom file
@@ -74,10 +78,12 @@ var gq = {
                       , response.statusMessage);
 
                     composite = composite;
-                /*XXX*/console.log('topRuncoms done');
-                callback(composite);
-                });
 
+                    /*XXX*/console.log('topRuncoms done');
+
+                    callback(composite);
+
+                });
             });
         }
     };
@@ -103,12 +109,14 @@ var gq = {
         composite.summary = _buildMessage(obj).summary;
 
         //load only first ten matching repositories
-        _buildBody(obj.body.items, function (parsedBody) { // ie. arr 'set'
-            /*XXX*/console.log('parsedBody', parsedBody);
-            composite.body = parsedBody;
+        _buildBody(obj.body.items, function (parsedBody, finished) { // ie. arr 'set'
+            if (finished) {
+                /*XXX*/console.log('parsedBody', parsedBody);
+                composite.body = parsedBody;
 
-            //*XXX*/console.log('composite.body{', composite.body, '}');
-            callback(composite);
+                //*XXX*/console.log('composite.body{', composite.body, '}');
+                callback(composite);
+            }
         });
 
         //callback(composite);
@@ -143,9 +151,10 @@ var gq = {
  */
     function _buildBody(items, callback) {
         console.log('_buildBody(%s %ss)', items.length, typeof items);
-
+        var selection = {};
         var limit = 10;
         var set = [];
+        var finished = 0;
         // Clamp the items we are assessing at a solid 50 maximum
         items.slice(0, 50);
         //*XXX*/console.log(Object.keys(items[0]));
@@ -156,25 +165,42 @@ var gq = {
          * values to it.
          */
         items.forEach(function (item, index, array) {
-            var selection = {};
+            selection = {};
             selection.full_name     = array[index].full_name;
             selection.score         = array[index].score;
             selection.svn_url       = array[index].svn_url;
             selection.description   = array[index].description;
 
-            // XXX temporarity disabled:
             _getRuncom(item, function (runcom) {
-                selection.runcom = runcom; // TODO check if null
-                set[index] = selection;
 
-                //*XXX*/console.log('%d/%d', index, array.length - 1);
+                //*XXX*/console.log(' index/arrlen: %d/%d', index, array.length - 1);
                 //*XXX*/console.log('selection=%j',set[index]);
-                if (limit <= 0 || index == array.length - 1) { // XXX this never triggers
-                    /*XXX*/console.log('_buildBody done');
-                    callback(set);
-                }
+
+                //*XXX*/console.log('WOOF! assess:', runcom);
+                //*XXX*/console.log('OINK! assess:', ('undefined' != typeof runcom));
+
+
+                //*XXX*/console.log('limit--');
+
                 limit--;
+
+                // if all done, cb: (eg 3 of 3)
+                //if ('undefined' != typeof selection.runcom) {
+                //*XXX*/console.log('v%s\ni%d\na%d (len)', item, index, array.length);
+                //*XXX*/console.log('counting...', array.length);
+                    selection.runcom = runcom;
+                    set[index] = selection;
+                    finished++;
+
+                    /*XXX*/console.log('finished %d of %d', finished, items.length -1);
+
+                    // check if finished for each matching repo
+                    if (finished === items.length) { // this never true
+                        /*XXX*/console.log('_buildBody done', selection.runcom);
+                        callback(set, true);
+                    }
             });
+
         });
     }
 
@@ -183,14 +209,15 @@ var gq = {
         var runcomPattern = new RegExp('^[\\.,dot,_]*' + gq.shell + '$', 'ig');
 
         var trees_url = item.trees_url.replace('{/sha}', '/' + item.default_branch);
-        var runcomFile = null;
+        var runcomFile = false;
+            var i     = 0;
 
         request({
             url: trees_url,
             json: true,
             headers: {
                 'User-Agent': 'comp74-student',
-                Authorization: 'token 03b098de70648125382888a011ffc49dd322dda4' // XXX REMOVE XXX
+                Authorization: 'token e03aa1982ccd7c291f39a0b0e4db54a0718c940c' // XXX REMOVE XXX
             }
         }, function (error, response, body) {
             if (error) throw new Error(error);
@@ -200,18 +227,32 @@ var gq = {
 
             // TODO if '.bashrc', this is our runcom - move to next
             // TODO if no match in this whole item then return false and try again
-            var i     = 0;
             var files = body.tree;
+            var numFiles = files.length;
             files.forEach(function (file) { // XXX no safe default if no match
-                if (file.path.match(runcomPattern)) {
-                    /*XXX*/console.log('file %s matches %s', file.path, runcomPattern);
-                    runcomFile = file.path || null;
 
-                } 
+                var fileName = file.path;
+
+                // TODO get actual number of files in repo !!!
+
+                //*XXX*/console.log('Checking file %d of %d', i, numFiles);
+                //*XXX*/console.log('checking %s in %s', file.path, trees_url);
+
+                if (fileName.match(runcomPattern)) {
+                    //*XXX*/console.log('file %s matches %s', file.path, runcomPattern);
+                    runcomFile = fileName;
+
+                }  else {
+                    runcomFile = 'NO MATCH';
+                }
+
+
+                if (i >= numFiles - 1) {
+                    /*XXX*/console.log('_getRuncom done with %s', runcomFile);
+                    callback(runcomFile); // Return matching runcom file
+                }
                 i++;
             });
-            /*XXX*/console.log('_getRuncom done with %s', runcomFile);
-            callback(runcomFile); // Return matching runcom file
         });
 
     }
